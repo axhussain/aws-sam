@@ -6,9 +6,6 @@ using Amazon.Lambda.Core;
 using HelloWorld.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
-// Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
-
 namespace HelloWorld
 {
     public class Function
@@ -30,6 +27,16 @@ namespace HelloWorld
         {
 
             var location = await _networkService.GetCallingIP();
+
+            if (location.StartsWith("10.0"))
+            {
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = 400,
+                    Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                };
+            }
+
             var body = new Dictionary<string, string>
             {
                 { "message", "hello world" },
